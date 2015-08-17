@@ -11,8 +11,12 @@ import flambe.scene.FadeTransition;
 import flambe.scene.SlideTransition;
 import flambe.animation.Ease;
 
+import minesweeper.screen.main.WaitScreen;
+import minesweeper.screen.main.MainScreen;
 import minesweeper.screen.GameScreen;
 import minesweeper.screen.main.TitleScreen;
+import minesweeper.screen.main.PromptScreen;
+import minesweeper.name.AssetName;
 
 /**
  * ...
@@ -24,7 +28,11 @@ class SceneManager
 	public var curGameScreen(default, null): GameScreen;
 	
 	private var gameScreens: Array<GameScreen>;
+	
 	private var gameTitleScreen: TitleScreen;
+	private var gameWaitScreen: WaitScreen;
+	private var gameMainScreen: MainScreen;
+	private var gamePromptScreen: PromptScreen;
 	
 	public static inline var TARGET_WIDTH: 	Int = 640;
 	public static inline var TARGET_HEIGHT: Int = 800;
@@ -43,6 +51,9 @@ class SceneManager
 		gameScreens = new Array<GameScreen>();
 		
 		gameScreens.push(gameTitleScreen = new TitleScreen(assetPack, storage));
+		gameScreens.push(gameWaitScreen = new WaitScreen(assetPack, storage));
+		gameScreens.push(gameMainScreen = new MainScreen(assetPack, storage));
+		gameScreens.push(gamePromptScreen = new PromptScreen(assetPack, storage));
 	}
 	
 	public function OnScreenResize() {
@@ -73,9 +84,57 @@ class SceneManager
 		gameDirector.unwindToScene(scene);
 	}
 	
-	public function ShowTitleScreen(willAnimate: Bool): Void {
+	public function ShowTitleScreen(willAnimate: Bool = false): Void {
 		gameDirector.unwindToScene(gameTitleScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
 		this.curGameScreen = gameTitleScreen;
+	}
+	
+	public function ShowWaitScreen(willAnimate: Bool = false): Void {
+		gameDirector.pushScene(gameWaitScreen.CreateScreen(),
+			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
+		//gameDirector.unwindToScene(gameWaitScreen.CreateScreen(),
+			//willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
+		//this.curGameScreen = gameWaitScreen;
+	}
+	
+	public function ShowPauseScreen(willAnimate: Bool = false): Void {
+		ShowPromptScreen(
+		AssetName.ASSET_GAME_OVER_HEADER,
+		[
+			"Continue", function() {
+				
+			},
+			"Retry", function() {
+				
+			}
+		]);
+	}
+	
+	public function ShowMainScreen(willAnimate: Bool = false): Void {
+		gameDirector.unwindToScene(gameMainScreen.CreateScreen(),
+			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
+		this.curGameScreen = gameMainScreen;
+	}
+	
+	public function ShowGameOverScreen(willAnimate: Bool = false): Void {
+		ShowPromptScreen(
+		AssetName.ASSET_GAME_OVER_HEADER,
+		[
+			"Retry", function() {
+				UnwindToScene(this.curGameScreen.screenEntity);
+			},
+			"Quit", function() {
+				ShowTitleScreen(true);
+			}
+		], true);
+		
+	}
+	
+	public function ShowPromptScreen(imgName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willANimate: Bool = false): Void {
+		gamePromptScreen.InitPrompt(imgName, buttons, animateBG);
+		gameDirector.pushScene(gamePromptScreen.CreateScreen(),
+			willANimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
+		gamePromptScreen.ShowScreen();
 	}
 }

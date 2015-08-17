@@ -35,7 +35,7 @@ class GameScreen extends GameData
 	
 	public function CreateScreen(): Entity {
 		screenEntity = new Entity()
-			.add(screenScene = new Scene())
+			.add(screenScene = new Scene(false))
 			.add(screenDisposer = new Disposer());
 			
 		screenBackground = new FillSprite(DEFAULT_BG_COLOR, System.stage.width, System.stage.height);
