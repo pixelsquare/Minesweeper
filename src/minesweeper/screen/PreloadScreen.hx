@@ -37,16 +37,16 @@ class PreloadScreen extends GameScreen
 		var loadingFont: Font = new Font(gameAsset, AssetName.FONT_VANADINE_32);
 		var loadingText: TextSprite = new TextSprite(loadingFont, "LOADING | ");
 		loadingText.centerAnchor();
-		loadingText.setXY(System.stage.width / 2, System.stage.height * 0.45);
+		loadingText.setXY(System.stage.width / 2, (System.stage.height * 0.5) - (loadingText.getNaturalHeight() / 2));
 		loadingEntity.addChild(new Entity().add(loadingText));
 		
-		var padding: Int = 50;
+		var padding: Int = 100;
 		var progressWidth: Float = System.stage.width - (padding * 2);
 		
 		var loadingBarEntity: Entity = new Entity();
 		var loadingBarBG: FillSprite = new FillSprite(LOADING_BAR_COLOR, progressWidth, 33);
 		loadingBarBG.centerAnchor();
-		loadingBarBG.setXY(System.stage.width / 2, System.stage.height * 0.5);
+		loadingBarBG.setXY(System.stage.width / 2, (System.stage.height * 0.5) + (loadingBarBG.getNaturalHeight() / 2));
 		loadingBarEntity.addChild(new Entity().add(loadingBarBG));
 		
 		var loadingBG: FillSprite = new FillSprite(BACKGROUND_COLOR, loadingBarBG.width._ * 0.98, 30);
