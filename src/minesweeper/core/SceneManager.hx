@@ -16,6 +16,7 @@ import minesweeper.screen.main.MainScreen;
 import minesweeper.screen.GameScreen;
 import minesweeper.screen.main.TitleScreen;
 import minesweeper.screen.main.PromptScreen;
+import minesweeper.screen.main.GameOverScreen;
 import minesweeper.name.AssetName;
 
 /**
@@ -27,12 +28,13 @@ class SceneManager
 	public var gameDirector(default, null): Director;
 	public var curGameScreen(default, null): GameScreen;
 	
-	private var gameScreens: Array<GameScreen>;
-	
-	private var gameTitleScreen: TitleScreen;
-	private var gameWaitScreen: WaitScreen;
-	private var gameMainScreen: MainScreen;
+	public var gameTitleScreen(default, null): TitleScreen;
+	public var gameWaitScreen(default, null): WaitScreen;
+	public var gameMainScreen(default, null): MainScreen;
+	public var gameOverScreen(default, null): GameOverScreen;
 	private var gamePromptScreen: PromptScreen;
+	
+	private var gameScreens: Array<GameScreen>;
 	
 	public static inline var TARGET_WIDTH: 	Int = 640;
 	public static inline var TARGET_HEIGHT: Int = 800;
@@ -53,6 +55,7 @@ class SceneManager
 		gameScreens.push(gameTitleScreen = new TitleScreen(assetPack, storage));
 		gameScreens.push(gameWaitScreen = new WaitScreen(assetPack, storage));
 		gameScreens.push(gameMainScreen = new MainScreen(assetPack, storage));
+		gameScreens.push(gameOverScreen = new GameOverScreen(assetPack, storage));
 		gameScreens.push(gamePromptScreen = new PromptScreen(assetPack, storage));
 	}
 	
@@ -93,20 +96,17 @@ class SceneManager
 	public function ShowWaitScreen(willAnimate: Bool = false): Void {
 		gameDirector.pushScene(gameWaitScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
-		//gameDirector.unwindToScene(gameWaitScreen.CreateScreen(),
-			//willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
-		//this.curGameScreen = gameWaitScreen;
 	}
 	
 	public function ShowPauseScreen(willAnimate: Bool = false): Void {
 		ShowPromptScreen(
 		AssetName.ASSET_GAME_OVER_HEADER,
 		[
-			"Continue", function() {
-				
+			"Resume", function() {
+				UnwindToScene(this.curGameScreen.screenEntity);
 			},
 			"Retry", function() {
-				
+				ShowMainScreen();
 			}
 		]);
 	}
@@ -118,23 +118,26 @@ class SceneManager
 	}
 	
 	public function ShowGameOverScreen(willAnimate: Bool = false): Void {
-		ShowPromptScreen(
-		AssetName.ASSET_GAME_OVER_HEADER,
-		[
-			"Retry", function() {
-				UnwindToScene(this.curGameScreen.screenEntity);
-			},
-			"Quit", function() {
-				ShowTitleScreen(true);
-			}
-		], true);
+		gameDirector.pushScene(gameOverScreen.CreateScreen(),
+			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
+		this.curGameScreen = gameOverScreen;
+		//ShowPromptScreen(
+		//AssetName.ASSET_GAME_OVER_HEADER,
+		//[
+			//"Retry", function() {
+				//ShowMainScreen();
+			//},
+			//"Quit", function() {
+				//ShowTitleScreen(true);
+			//}
+		//], true);
 		
 	}
 	
-	public function ShowPromptScreen(imgName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willANimate: Bool = false): Void {
+	public function ShowPromptScreen(imgName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willAnimate: Bool = false): Void {
 		gamePromptScreen.InitPrompt(imgName, buttons, animateBG);
 		gameDirector.pushScene(gamePromptScreen.CreateScreen(),
-			willANimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
+			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
 		gamePromptScreen.ShowScreen();
 	}
 }

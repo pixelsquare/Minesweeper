@@ -27,7 +27,7 @@ class GameScreen extends DataManager
 	private var screenBackground: FillSprite;
 	private var screenTitleText: TextSprite;
 	
-	private static inline var DEFAULT_BG_COLOR: Int = 0x202020;
+	private static inline var DEFAULT_BG_COLOR: Int = 0x000000;
 	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
 		super(assetPack, storage);

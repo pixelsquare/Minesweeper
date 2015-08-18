@@ -18,7 +18,7 @@ import minesweeper.main.MSMain;
 import minesweeper.core.SceneManager;
 import minesweeper.screen.GameScreen;
 import minesweeper.name.AssetName;
-import minesweeper.Utils;
+import minesweeper.core.Utils;
 import minesweeper.name.GameData;
 
 /**
@@ -28,13 +28,18 @@ import minesweeper.name.GameData;
 class MainScreen extends GameScreen
 {
 
-	private var gameTime: Int;
-	private var gameBombCount: Int;
+	public var gameTimeElapsed(default, null): Float;
+	public var gameBombCount(default, null) : Int;
+	
+	private var timerText: TextSprite;
+	private var bombsText: TextSprite;
+	
+	private var msMain: MSMain;
 	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
 		super(assetPack, storage);
 		
-		this.gameTime = GameData.GAME_DEFAULT_TIME;
+		this.gameTimeElapsed = GameData.GAME_DEFAULT_TIME;
 		this.gameBombCount = GameData.GAME_MAX_BOMBS;
 		
 		//System.keyboard.down.connect(function(event: KeyboardEvent) {
@@ -51,14 +56,14 @@ class MainScreen extends GameScreen
 		screenEntity.addChild(new Entity().add(background));
 		
 		// Wait before starting
-		var script: Script = new Script();
-		script.run(new Sequence([
-			new Delay(0.1),
-			new CallFunction(function() {
-				SceneManager.current.ShowWaitScreen();
-			})
-		]));
-		screenEntity.add(script);
+		//var script: Script = new Script();
+		//script.run(new Sequence([
+			//new Delay(0.1),
+			//new CallFunction(function() {
+				//SceneManager.current.ShowWaitScreen();
+			//})
+		//]));
+		//screenEntity.add(script);
 		
 		var timerEntity: Entity = new Entity();
 		var timerBg: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_TIMER_CONTAINER));
@@ -70,7 +75,7 @@ class MainScreen extends GameScreen
 		timerEntity.addChild(new Entity().add(timerBg));
 		
 		var timerFont: Font = new Font(gameAsset, AssetName.FONT_VANADINE_32);
-		var timerText: TextSprite = new TextSprite(timerFont, Utils.ToMMSS(gameTime));
+		timerText = new TextSprite(timerFont, Utils.ToMMSS(gameTimeElapsed));
 		timerText.centerAnchor();
 		timerText.setXY(
 			timerBg.x._ + 20,
@@ -90,7 +95,7 @@ class MainScreen extends GameScreen
 		bombsEntity.addChild(new Entity().add(bombsBg));
 		
 		var bombsFont: Font = new Font(gameAsset, AssetName.FONT_VANADINE_32);
-		var bombsText: TextSprite = new TextSprite(bombsFont, gameBombCount + "");
+		bombsText = new TextSprite(bombsFont, gameBombCount + "");
 		bombsText.centerAnchor();
 		bombsText.setXY(
 			bombsBg.x._ + 20,
@@ -100,8 +105,18 @@ class MainScreen extends GameScreen
 		
 		screenEntity.addChild(bombsEntity);
 		
-		var mineSweeperMain: MSMain = new MSMain(gameAsset, gameStorage);
-		screenEntity.addChild(mineSweeperMain.Init());
+		msMain = new MSMain(gameAsset, gameStorage);
+		screenEntity.addChild(new Entity().add(msMain));
+		
+		msMain.bombCount.watch(function(a: Float, b: Float) {
+			gameBombCount = Std.int(msMain.bombCount._);
+			bombsText.text = gameBombCount + "";
+		});
+		
+		msMain.timeElapsed.watch(function(a: Float, b: Float) {
+			gameTimeElapsed = msMain.timeElapsed._;
+			timerText.text = Utils.ToMMSS(gameTimeElapsed);
+		});
 		
 		return screenEntity;
 	}
