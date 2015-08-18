@@ -8,7 +8,7 @@ import flambe.Disposer;
  * ...
  * @author Anthony Ganzon
  */
-class GameData
+class DataManager
 {
 	public var gameAsset(default, null): AssetPack;
 	public var gameStorage(default, null): StorageSystem;

@@ -7,7 +7,7 @@ import flambe.scene.Director;
 import flambe.subsystem.StorageSystem;
 import flambe.System;
 import flambe.util.Promise;
-import minesweeper.core.GameData;
+import minesweeper.core.DataManager;
 import minesweeper.core.SceneManager;
 import minesweeper.screen.PreloadScreen;
 import minesweeper.screen.SplashScreen;

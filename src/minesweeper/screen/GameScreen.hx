@@ -10,14 +10,14 @@ import flambe.subsystem.StorageSystem;
 import flambe.Entity;
 import flambe.System;
 
-import minesweeper.core.GameData;
+import minesweeper.core.DataManager;
 import minesweeper.name.AssetName;
 
 /**
  * ...
  * @author Anthony Ganzon
  */
-class GameScreen extends GameData
+class GameScreen extends DataManager
 {	
 	public var screenEntity(default, null): Entity;
 	

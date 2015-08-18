@@ -13,11 +13,13 @@ import flambe.subsystem.StorageSystem;
 import flambe.display.ImageSprite;
 import flambe.System;
 import flambe.input.Key;
+import minesweeper.main.MSMain;
 
 import minesweeper.core.SceneManager;
 import minesweeper.screen.GameScreen;
 import minesweeper.name.AssetName;
 import minesweeper.Utils;
+import minesweeper.name.GameData;
 
 /**
  * ...
@@ -29,13 +31,11 @@ class MainScreen extends GameScreen
 	private var gameTime: Int;
 	private var gameBombCount: Int;
 	
-	private static inline var GAME_DEFAULT_TIME: Int = 300;
-	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
 		super(assetPack, storage);
 		
-		this.gameTime = GAME_DEFAULT_TIME;
-		this.gameBombCount = 0;
+		this.gameTime = GameData.GAME_DEFAULT_TIME;
+		this.gameBombCount = GameData.GAME_MAX_BOMBS;
 		
 		//System.keyboard.down.connect(function(event: KeyboardEvent) {
 			//if (event.key == Key.B) {
@@ -99,6 +99,9 @@ class MainScreen extends GameScreen
 		bombsEntity.addChild(new Entity().add(bombsText));
 		
 		screenEntity.addChild(bombsEntity);
+		
+		var mineSweeperMain: MSMain = new MSMain(gameAsset, gameStorage);
+		screenEntity.addChild(mineSweeperMain.Init());
 		
 		return screenEntity;
 	}
