@@ -1,4 +1,4 @@
-package minesweeper.core;
+package minesweeper.main;
 
 import minesweeper.main.MSMain;
 import minesweeper.main.MSBlock;
@@ -126,6 +126,26 @@ class MSUtils
 	public static function GetAllMarkedBlocks(blocks: Array<MSBlock>): Array<MSBlock> {
 		var result: Array<MSBlock> = new Array<MSBlock>();
 		for (block in blocks) {
+			if (block.IsBlockMarked()) {
+				result.push(block);
+			}
+		}
+		return result;
+	}
+	
+	public static function GetUnMarkedBombBlocks(blocks: Array<MSBlock>): Array<MSBlock> {
+		var result: Array<MSBlock> = new Array<MSBlock>();
+		for (block in GetAllBombBlocks(blocks)) {
+			if (!block.IsBlockMarked()) {
+				result.push(block);
+			}
+		}
+		return result;
+	}
+	
+	public static function GetMarkedBombBlocks(blocks: Array<MSBlock>): Array<MSBlock> {
+		var result: Array<MSBlock> = new Array<MSBlock>();
+		for (block in GetAllBombBlocks(blocks)) {
 			if (block.IsBlockMarked()) {
 				result.push(block);
 			}

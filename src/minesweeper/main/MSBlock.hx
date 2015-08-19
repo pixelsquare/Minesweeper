@@ -18,7 +18,7 @@ import flambe.script.Delay;
 import flambe.script.Repeat;
 import flambe.script.Script;
 import flambe.script.Sequence;
-import minesweeper.core.MSUtils;
+import minesweeper.main.MSUtils;
 import minesweeper.core.SceneManager;
 import flambe.System;
 import flambe.input.MouseButton;
@@ -157,10 +157,11 @@ class MSBlock extends Component
 	}
 	
 	public function RevealBlock(forceReveal: Bool = false): Void {
-		if (blockRevealed || blockMarked)
+		if (!forceReveal && (blockRevealed || blockMarked))
 			return;
 			
-		markerImage.visible = false;
+		markerImage.visible = (blockMarked && blockHasBomb) ? true : false;
+		
 		var script: Script = new Script();
 		script.run(new Sequence([
 			new CallFunction(function() {

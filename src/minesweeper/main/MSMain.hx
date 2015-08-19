@@ -23,7 +23,7 @@ import minesweeper.pxlSq.Utils;
 import minesweeper.core.DataManager;
 import minesweeper.name.AssetName;
 import minesweeper.name.GameData;
-import minesweeper.core.MSUtils;
+import minesweeper.main.MSUtils;
 import minesweeper.core.SceneManager;
 
 /**
@@ -69,9 +69,6 @@ class MSMain extends DataManager
 		CreateBoard();
 		SpawnBombs();
 		EvaluateBlocks();
-		
-		// TODO: block should use pointer for phones and html version
-		// try removing curBlock
 
 		var curBlock: MSBlock = null;
 		onMouseClick = new Signal1<MSBlock>();
@@ -80,6 +77,7 @@ class MSMain extends DataManager
 		});
 		
 		if (System.mouse.supported) {
+			// Mouse events for left and right buttons
 			System.mouse.down.connect(function(event: MouseEvent) {
 				if (curBlock == null)
 					return;
@@ -93,6 +91,18 @@ class MSMain extends DataManager
 				
 				if (event.button == MouseButton.Right) {
 					curBlock.MarkBlock();
+				}
+			});
+		}
+		else {
+			// Doesn't support flag placing
+			System.pointer.down.connect(function(event: PointerEvent) {
+				if (curBlock == null)
+					return;
+				
+				if (canMove && !hasStopped) {
+					StartGame();
+					curBlock.RevealBlock();
 				}
 			});
 		}

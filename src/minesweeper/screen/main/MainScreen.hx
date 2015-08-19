@@ -18,29 +18,21 @@ import minesweeper.main.MSMain;
 import minesweeper.core.SceneManager;
 import minesweeper.screen.GameScreen;
 import minesweeper.name.AssetName;
-import minesweeper.core.MSUtils;
+import minesweeper.main.MSUtils;
 import minesweeper.name.GameData;
+import minesweeper.core.GameManager;
 
 /**
  * ...
  * @author Anthony Ganzon
  */
 class MainScreen extends GameScreen
-{
-
-	public var gameTimeElapsed(default, null): Float;
-	public var gameBombCount(default, null) : Int;
-	
+{	
 	private var timerText: TextSprite;
 	private var bombsText: TextSprite;
 	
-	private var msMain: MSMain;
-	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
 		super(assetPack, storage);
-		
-		this.gameTimeElapsed = GameData.GAME_DEFAULT_TIME;
-		this.gameBombCount = GameData.GAME_MAX_BOMBS;
 		
 		System.keyboard.down.connect(function(event: KeyboardEvent) {
 			if (event.key == Key.F1) {
@@ -52,11 +44,17 @@ class MainScreen extends GameScreen
 			}
 			
 			if (event.key == Key.F3) {
-				MSUtils.RevealAllNonBombs(msMain.GetAllBlocks());
+				MSUtils.RevealAllNonBombs(GameManager.GetMSMain().GetAllBlocks());
 			}
 			
 			if (event.key == Key.F4) {
-				MSUtils.RevealAllBlocks(msMain.GetAllBlocks());
+				MSUtils.RevealAllBlocks(GameManager.GetMSMain().GetAllBlocks());
+			}
+			
+			if (event.key == Key.P) {
+				if(GameManager.GetMSMain().hasStarted) {
+					SceneManager.current.ShowPauseScreen();
+				}
 			}
 		});
 	}
@@ -87,7 +85,7 @@ class MainScreen extends GameScreen
 		timerEntity.addChild(new Entity().add(timerBg));
 		
 		var timerFont: Font = new Font(gameAsset, AssetName.FONT_VANADINE_32);
-		timerText = new TextSprite(timerFont, MSUtils.ToMMSS(gameTimeElapsed));
+		timerText = new TextSprite(timerFont, MSUtils.ToMMSS(GameManager.gameTimeElapsed));
 		timerText.centerAnchor();
 		timerText.setXY(
 			timerBg.x._ + 20,
@@ -107,7 +105,7 @@ class MainScreen extends GameScreen
 		bombsEntity.addChild(new Entity().add(bombsBg));
 		
 		var bombsFont: Font = new Font(gameAsset, AssetName.FONT_VANADINE_32);
-		bombsText = new TextSprite(bombsFont, gameBombCount + "");
+		bombsText = new TextSprite(bombsFont, GameManager.gameBombCount + "");
 		bombsText.centerAnchor();
 		bombsText.setXY(
 			bombsBg.x._ + 20,
@@ -117,17 +115,15 @@ class MainScreen extends GameScreen
 		
 		screenEntity.addChild(bombsEntity);
 		
-		msMain = new MSMain(gameAsset, gameStorage);
-		screenEntity.addChild(new Entity().add(msMain));
+		GameManager.InitMSGame(screenEntity);
 		
-		msMain.bombCount.watch(function(a: Float, b: Float) {
-			gameBombCount = Std.int(msMain.bombCount._);
-			bombsText.text = gameBombCount + "";
+		// Update all GUI
+		GameManager.GetMSMain().bombCount.watch(function(a: Float, b: Float) {
+			bombsText.text = GameManager.gameBombCount + "";
 		});
 		
-		msMain.timeElapsed.watch(function(a: Float, b: Float) {
-			gameTimeElapsed = msMain.timeElapsed._;
-			timerText.text = MSUtils.ToMMSS(gameTimeElapsed);
+		GameManager.GetMSMain().timeElapsed.watch(function(a: Float, b:Float) {
+			timerText.text = MSUtils.ToMMSS(GameManager.gameTimeElapsed);
 		});
 		
 		return screenEntity;
@@ -138,6 +134,6 @@ class MainScreen extends GameScreen
 	}
 	
 	public function HasReachedGoals(): Bool {
-		return msMain.HasReachedGoals();
+		return GameManager.GetMSMain().HasReachedGoals();
 	}
 }

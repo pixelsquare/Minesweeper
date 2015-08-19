@@ -11,6 +11,7 @@ import minesweeper.core.DataManager;
 import minesweeper.core.SceneManager;
 import minesweeper.screen.PreloadScreen;
 import minesweeper.screen.SplashScreen;
+import minesweeper.core.GameManager;
 
 import minesweeper.pxlSq.Utils;
 
@@ -39,7 +40,9 @@ class Main
 				Utils.ConsoleLog("Main Initialize");
 				
 				// Load up all asset data
+				GameManager.Init(mainPack, gameStorage);
 				sceneManager.InitScenes(mainPack, gameStorage);
+				
 				#if flash
 					sceneManager.ShowTitleScreen(true);
 					//sceneManager.ShowMainScreen(true);
