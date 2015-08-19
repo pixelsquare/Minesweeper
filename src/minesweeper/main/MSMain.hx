@@ -20,6 +20,7 @@ import minesweeper.core.DataManager;
 import minesweeper.name.AssetName;
 import minesweeper.name.GameData;
 import minesweeper.core.Utils;
+import minesweeper.core.SceneManager;
 
 /**
  * ...
@@ -31,6 +32,8 @@ class MSMain extends DataManager
 	public var bombCount(default, null): AnimatedFloat;
 	public var markedBlocks(default, null): Int;
 	public var timeElapsed(default, null): AnimatedFloat;
+	
+	public var blocksOpened: Int;
 	public var curBlock: MSBlock;
 	public var hasStarted: Bool;
 	public var hasStopped: Bool;
@@ -64,10 +67,18 @@ class MSMain extends DataManager
 				if (hasStopped) return;
 				
 				if (event.button == MouseButton.Left) {
-					curBlock.SetIsRevealed(true);
-					hasStarted = true;
-					if (curBlock.hasBomb) {
-						hasStopped = true;
+					if(curBlock != null) {
+						curBlock.SetIsRevealed(true);
+						hasStarted = true;
+						if (curBlock.hasBomb) {
+							hasStopped = true;
+							return;
+						}
+						
+						SetOpenBlocksDirty();
+						if (HasReachedGoals()) {
+							SceneManager.current.ShowGameOverScreen();
+						}
 					}
 				}
 				
@@ -170,6 +181,14 @@ class MSMain extends DataManager
 	
 	public function SetBombCountDirty(): Void {
 		bombCount._ = GameData.GAME_MAX_BOMBS - markedBlocks;
+	}
+	
+	public function SetOpenBlocksDirty(): Void {
+		this.blocksOpened = Utils.GetRevealedBlocks().length;
+	}
+	
+	public function HasReachedGoals(): Bool {
+		return ((GameData.GAME_GRID_ROWS * GameData.GAME_GRID_COLS) - GameData.GAME_MAX_BOMBS) == blocksOpened;
 	}
 	
 	override public function onAdded() {

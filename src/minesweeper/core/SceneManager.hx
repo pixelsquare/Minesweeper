@@ -10,6 +10,7 @@ import flambe.display.Sprite;
 import flambe.scene.FadeTransition;
 import flambe.scene.SlideTransition;
 import flambe.animation.Ease;
+import minesweeper.screen.main.PromptTextScreen;
 
 import minesweeper.screen.main.WaitScreen;
 import minesweeper.screen.main.MainScreen;
@@ -33,6 +34,7 @@ class SceneManager
 	public var gameMainScreen(default, null): MainScreen;
 	public var gameOverScreen(default, null): GameOverScreen;
 	private var gamePromptScreen: PromptScreen;
+	private var gamePromptTextScreen: PromptTextScreen;
 	
 	private var gameScreens: Array<GameScreen>;
 	
@@ -57,6 +59,7 @@ class SceneManager
 		gameScreens.push(gameMainScreen = new MainScreen(assetPack, storage));
 		gameScreens.push(gameOverScreen = new GameOverScreen(assetPack, storage));
 		gameScreens.push(gamePromptScreen = new PromptScreen(assetPack, storage));
+		gameScreens.push(gamePromptTextScreen = new PromptTextScreen(assetPack, storage));
 	}
 	
 	public function OnScreenResize() {
@@ -99,8 +102,8 @@ class SceneManager
 	}
 	
 	public function ShowPauseScreen(willAnimate: Bool = false): Void {
-		ShowPromptScreen(
-		AssetName.ASSET_GAME_OVER_HEADER,
+		ShowPromptTextScreen(
+		"Paused!",
 		[
 			"Resume", function() {
 				UnwindToScene(this.curGameScreen.screenEntity);
@@ -108,7 +111,7 @@ class SceneManager
 			"Retry", function() {
 				ShowMainScreen();
 			}
-		]);
+		], true);
 	}
 	
 	public function ShowMainScreen(willAnimate: Bool = false): Void {
@@ -120,18 +123,7 @@ class SceneManager
 	public function ShowGameOverScreen(willAnimate: Bool = false): Void {
 		gameDirector.pushScene(gameOverScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
-		this.curGameScreen = gameOverScreen;
-		//ShowPromptScreen(
-		//AssetName.ASSET_GAME_OVER_HEADER,
-		//[
-			//"Retry", function() {
-				//ShowMainScreen();
-			//},
-			//"Quit", function() {
-				//ShowTitleScreen(true);
-			//}
-		//], true);
-		
+		this.curGameScreen = gameOverScreen;		
 	}
 	
 	public function ShowPromptScreen(imgName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willAnimate: Bool = false): Void {
@@ -139,5 +131,12 @@ class SceneManager
 		gameDirector.pushScene(gamePromptScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
 		gamePromptScreen.ShowScreen();
+	}
+	
+	public function ShowPromptTextScreen(titleName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willAnimate: Bool = false): Void {
+		gamePromptTextScreen.InitPrompt(titleName, buttons, animateBG);
+		gameDirector.pushScene(gamePromptTextScreen.CreateScreen(),
+			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear): null);
+		gamePromptTextScreen.ShowScreen();
 	}
 }

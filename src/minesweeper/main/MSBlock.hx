@@ -9,6 +9,7 @@ import flambe.display.TextSprite;
 import flambe.display.Texture;
 import flambe.Entity;
 import flambe.input.PointerEvent;
+import flambe.scene.Scene;
 import flambe.script.Action;
 import flambe.script.AnimateTo;
 import flambe.script.CallFunction;
@@ -77,25 +78,27 @@ class MSBlock extends Component
 		
 		innerImage = new ImageSprite(innerTexture);
 		innerImage.centerAnchor();
+		innerImage.visible = false;
 		blockButtonEntity.addChild(new Entity().add(innerImage));
 		
 		blockValueText = new TextSprite(blockValueFont, blockValue + "");
-		blockValueText.alpha._ = 0.0;
 		blockValueText.centerAnchor();
+		//blockValueText.visible = false;
 		blockButtonEntity.addChild(new Entity().add(blockValueText));
 		
 		bombImage = new ImageSprite(bombTexture);
-		bombImage.alpha._ = 0.0;
 		bombImage.centerAnchor();
+		//bombImage.visible = false;
 		blockButtonEntity.addChild(new Entity().add(bombImage));
 		
 		outerImage = new ImageSprite(outerTexture);
 		outerImage.centerAnchor();
+		outerImage.setAlpha(0.25);
 		blockButtonEntity.addChild(new Entity().add(outerImage));
 		
 		markerImage = new ImageSprite(flagTexture);
-		markerImage.alpha._ = 0.0;
 		markerImage.centerAnchor();
+		markerImage.visible = false;
 		blockButtonEntity.addChild(new Entity().add(markerImage));
 		
 		blockEntity.addChild(blockButtonEntity.add(blockSprite));
@@ -121,19 +124,24 @@ class MSBlock extends Component
 		return this;
 	}
 	
-	public function SetBlockValue(value: Int): Void {		
-		if (value == 0 || this.hasBomb)
+	public function SetBlockValue(value: Int): Void {
+		//if (value == 0)
+			//return;
+		
+		if (this.hasBomb)
 			return;
 		
 		this.blockValue = value;
 			
 		if (value == -1) {
+			bombImage.visible = true;
+			blockValueText.visible = false;
 			SetHasBomb(true);
 			return;
 		}
 		
-		bombImage.alpha._ = 0;
-		blockValueText.alpha._ = 1;
+		blockValueText.visible = true;
+		bombImage.visible = false;
 		blockValueText.text = this.blockValue + "";
 	}
 	
@@ -141,24 +149,27 @@ class MSBlock extends Component
 		if (this.hasBomb == hasBomb)
 			return;
 		
-		if (hasBomb) {
-			blockValueText.alpha._ = 0;
-			bombImage.alpha._ = 1;
-		}
-		else {
-			bombImage.alpha._ = 0;
-			blockValueText.alpha._ = 1;
-		}
-		
 		this.hasBomb = hasBomb;
 	}
 	
 	public function SetIsRevealed(isRevealed: Bool): Void {
 		if (this.isRevealed == isRevealed)
 			return;
+			
+		if (this.isMarked && markerCount == 1)
+			return;
 		
+		innerImage.visible = true;
+		if (hasBomb) {
+			bombImage.visible = true;
+		}
+		else {
+			if (blockValue > 0) {
+				blockValueText.visible = true;
+			}
+		}
+			
 		var action;
-		
 		if (isRevealed) {
 			outerImage.alpha._ = 1;
 			action = new AnimateTo(outerImage.alpha, 0, 0.5);
@@ -175,10 +186,11 @@ class MSBlock extends Component
 				if (this.hasBomb) {
 					SceneManager.current.ShowGameOverScreen();
 				}
+				outerImage.visible = false;
 			})
 		]));
 		
-		markerImage.alpha._ = 0;
+		markerImage.visible = false;
 		this.isRevealed = isRevealed;
 		
 		if (this.blockValue == 0) {
@@ -188,11 +200,11 @@ class MSBlock extends Component
 		blockEntity.addChild(new Entity().add(script));
 	}
 	
-	public function SetIsMarked(isMarked: Bool): Void {
-		//if (this.isMarked == isMarked)
-			//return;
-			
+	public function SetIsMarked(isMarked: Bool): Void {			
 		if (this.isRevealed)
+			return;
+			
+		if (MSMain.current.bombCount._ <= 0 && markerCount == 0)
 			return;
 			
 		markerCount++;
@@ -201,22 +213,39 @@ class MSBlock extends Component
 			isMarked = false;
 		}
 		
-		if (markerCount == 1) {
+		if (markerCount == 1) {				
 			markerImage.texture = flagTexture;
 			MSMain.current.AddMarkedBlocks();
+			markerImage.visible = true;
 		}
 		else if (markerCount == 2) {
 			markerImage.texture = qMarkTexture;
 			MSMain.current.SubtractMarkedBlocks();
+			markerImage.visible = true;
 		}
 		
+		var action: Action;
 		if (isMarked) {
-			markerImage.alpha.animate(0, 1, 0.5);
+			markerImage.alpha._ = 0;
+			action = new AnimateTo(markerImage.alpha, 1, 0.5);
 		}
 		else {
-			markerImage.alpha.animate(1, 0, 0.5);
+			markerImage.alpha._ = 1;
+			action = new AnimateTo(markerImage.alpha, 0, 0.5);
 		}
+		
+		var script: Script = new Script();
+		script.run(new Sequence([
+			action,
+			new CallFunction(function() {
+				if(!isMarked) {
+					markerImage.visible = false;
+				}
+			})
+		]));
 			
+		blockEntity.addChild(new Entity().add(script));
+		
 		this.isMarked = isMarked;
 	}
 	

@@ -28,7 +28,7 @@ import minesweeper.pxlSq.Utils;
  */
 class PromptScreen extends GameScreen
 {
-	private var titleText: ImageSprite;
+	private var titleImage: ImageSprite;
 	private var buttonSpriteList: Array<Sprite>;
 	
 	private var textureName: String;
@@ -53,13 +53,15 @@ class PromptScreen extends GameScreen
 		screenBackground.alpha._ = 0;
 		RemoveTitleText();
 		
-		titleText = new ImageSprite(gameAsset.getTexture(textureName));
-		titleText.centerAnchor();
-		titleText.setXY(
-			System.stage.width / 2,
-			System.stage.height * 0.3
-		);
-		screenEntity.addChild(new Entity().add(titleText));
+		if(textureName != "") {
+			titleImage = new ImageSprite(gameAsset.getTexture(textureName));
+			titleImage.centerAnchor();
+			titleImage.setXY(
+				System.stage.width / 2,
+				System.stage.height * 0.3
+			);
+			screenEntity.addChild(new Entity().add(titleImage));
+		}
 		
 		var buttonsEntity: Entity = new Entity();
 		buttonSpriteList = new Array<Sprite>();
@@ -138,7 +140,7 @@ class PromptScreen extends GameScreen
 		}
 		
 		var buttonYPos: Array<Float> = new Array<Float>();
-		titleText.x._ = -(titleText.getNaturalWidth());
+		titleImage.x._ = -(titleImage.getNaturalWidth());
 		for (button in buttonSpriteList) {
 			buttonYPos.push(button.y._);
 			button.y._ = (System.stage.height) + button.getNaturalHeight();
@@ -146,7 +148,7 @@ class PromptScreen extends GameScreen
 		
 		var script: Script = new Script();
 		script.run(new Sequence([
-			new AnimateTo(titleText.x, System.stage.width / 2, 0.5, Ease.backInOut),
+			new AnimateTo(titleImage.x, System.stage.width / 2, 0.5, Ease.backInOut),
 			new CallFunction(function() {
 				var ii: Int = 0;	
 				for (button in buttonSpriteList) {

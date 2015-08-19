@@ -58,4 +58,17 @@ class Utils
 			}
 		}
 	}
+	
+	public static function GetRevealedBlocks(): Array<MSBlock> {
+		var result: Array<MSBlock> = new Array<MSBlock>();
+		for (ii in 0...MSMain.current.boardBlocks.length) {
+			for (blocks in MSMain.current.boardBlocks[ii]) {
+				if (blocks.isRevealed) {
+					result.push(blocks);
+				}
+			}
+		}
+		
+		return result;
+	}
 }

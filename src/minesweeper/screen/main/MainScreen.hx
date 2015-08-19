@@ -42,11 +42,12 @@ class MainScreen extends GameScreen
 		this.gameTimeElapsed = GameData.GAME_DEFAULT_TIME;
 		this.gameBombCount = GameData.GAME_MAX_BOMBS;
 		
-		//System.keyboard.down.connect(function(event: KeyboardEvent) {
-			//if (event.key == Key.B) {
+		System.keyboard.down.connect(function(event: KeyboardEvent) {
+			if (event.key == Key.B) {
+				SceneManager.current.ShowPauseScreen();
 				//SceneManager.current.ShowGameOverScreen();
-			//}
-		//});
+			}
+		});
 	}
 	
 	override public function CreateScreen(): Entity {
@@ -123,5 +124,9 @@ class MainScreen extends GameScreen
 	
 	override public function GetScreenName(): String {
 		return super.GetScreenName();
+	}
+	
+	public function HasReachedGoals(): Bool {
+		return msMain.HasReachedGoals();
 	}
 }
