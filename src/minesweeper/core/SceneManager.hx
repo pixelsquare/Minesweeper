@@ -90,6 +90,10 @@ class SceneManager
 		gameDirector.unwindToScene(scene);
 	}
 	
+	public function UnwindToCurrentScene(): Void {
+		UnwindToScene(curGameScreen.screenEntity);
+	}
+	
 	public function ShowTitleScreen(willAnimate: Bool = false): Void {
 		gameDirector.unwindToScene(gameTitleScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
@@ -127,6 +131,9 @@ class SceneManager
 	}
 	
 	public function ShowPromptScreen(imgName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willAnimate: Bool = false): Void {
+		if (gameDirector.topScene == gamePromptScreen.screenEntity)
+			return;
+			
 		gamePromptScreen.InitPrompt(imgName, buttons, animateBG);
 		gameDirector.pushScene(gamePromptScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear) : null);
@@ -134,6 +141,9 @@ class SceneManager
 	}
 	
 	public function ShowPromptTextScreen(titleName: String, buttons: Array<Dynamic>, animateBG: Bool = false, willAnimate: Bool = false): Void {
+		if (gameDirector.topScene == gamePromptTextScreen.screenEntity)
+			return;
+		
 		gamePromptTextScreen.InitPrompt(titleName, buttons, animateBG);
 		gameDirector.pushScene(gamePromptTextScreen.CreateScreen(),
 			willAnimate ? new FadeTransition(TRANSITION_SHORT, Ease.linear): null);

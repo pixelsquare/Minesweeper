@@ -11,15 +11,19 @@ import flambe.display.Texture;
 import flambe.System;
 import flambe.math.FMath;
 import flambe.input.MouseButton;
+import flambe.util.Signal1.Listener1;
+import flambe.util.SignalConnection;
 import minesweeper.screen.GameScreen;
 import minesweeper.screen.main.MainScreen;
 import flambe.animation.AnimatedFloat;
 import haxe.Timer;
+import flambe.util.Signal1;
+import minesweeper.pxlSq.Utils;
 
 import minesweeper.core.DataManager;
 import minesweeper.name.AssetName;
 import minesweeper.name.GameData;
-import minesweeper.core.Utils;
+import minesweeper.core.MSUtils;
 import minesweeper.core.SceneManager;
 
 /**
@@ -28,29 +32,33 @@ import minesweeper.core.SceneManager;
  */
 class MSMain extends DataManager
 {
-	public var boardBlocks(default, null): Array<Array<MSBlock>>;
-	public var bombCount(default, null): AnimatedFloat;
 	public var markedBlocks(default, null): Int;
+	public var bombCount(default, null): AnimatedFloat;
 	public var timeElapsed(default, null): AnimatedFloat;
 	
 	public var blocksOpened: Int;
-	public var curBlock: MSBlock;
 	public var hasStarted: Bool;
 	public var hasStopped: Bool;
+	public var canMove: Bool;
+	public var onMouseClick: Signal1<MSBlock>;
 	
 	private var gameEntity: Entity;
+	private var boardBlocks: Array<Array<MSBlock>>;
+	private var boardBlockList: Array<MSBlock>;
 	
-	public static var current: MSMain;
+	// For Debugging!
+	private var visualize: Bool = false;
 	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
 		super(assetPack, storage);
-		current = this;
 		
+		this.markedBlocks = 0;
 		this.bombCount = new AnimatedFloat(GameData.GAME_MAX_BOMBS);
 		this.timeElapsed = new AnimatedFloat(GameData.GAME_DEFAULT_TIME);
-		this.markedBlocks = 0;
+		
 		this.hasStarted = false;
 		this.hasStopped = false;
+		this.canMove = true;
 		
 		Init();
 	}
@@ -62,34 +70,30 @@ class MSMain extends DataManager
 		SpawnBombs();
 		EvaluateBlocks();
 		
-		if(System.mouse.supported) {
+		// TODO: block should use pointer for phones and html version
+		// try removing curBlock
+
+		var curBlock: MSBlock = null;
+		onMouseClick = new Signal1<MSBlock>();
+		onMouseClick.connect(function(block: MSBlock) {
+			curBlock = block;
+		});
+		
+		if (System.mouse.supported) {
 			System.mouse.down.connect(function(event: MouseEvent) {
-				if (hasStopped) return;
+				if (curBlock == null)
+					return;
 				
 				if (event.button == MouseButton.Left) {
-					if(curBlock != null) {
-						curBlock.SetIsRevealed(true);
-						hasStarted = true;
-						if (curBlock.hasBomb) {
-							hasStopped = true;
-							return;
-						}
-						
-						SetOpenBlocksDirty();
-						if (HasReachedGoals()) {
-							SceneManager.current.ShowGameOverScreen();
-						}
+					if (canMove && !hasStopped) {
+						StartGame();
+						curBlock.RevealBlock();
 					}
 				}
 				
 				if (event.button == MouseButton.Right) {
-					curBlock.SetIsMarked(true);
+					curBlock.MarkBlock();
 				}
-			});
-		}
-		else {
-			System.pointer.down.connect(function(event: PointerEvent) {
-				curBlock.SetIsRevealed(true);
 			});
 		}
 	}
@@ -97,13 +101,15 @@ class MSMain extends DataManager
 	public function CreateBoard(): Void {
 		var blockEntity: Entity = new Entity();
 		boardBlocks = new Array<Array<MSBlock>>();
+		boardBlockList = new Array<MSBlock>();
 		
 		var x: Int = 0;
 		while (x < GameData.GAME_GRID_ROWS) {
 			var blockArray: Array<MSBlock> = new Array<MSBlock>();
 			var y: Int = 0;
 			while(y < GameData.GAME_GRID_COLS) {
-				var block: MSBlock = new MSBlock(
+				var block: MSBlock = new MSBlock(this, visualize);
+				block.Init(
 					gameAsset.getTexture(AssetName.ASSET_PRESSED_BLOCK),
 					new Font(gameAsset, AssetName.FONT_BEBASNEUE_20),
 					gameAsset.getTexture(AssetName.ASSET_BOMB),
@@ -119,6 +125,7 @@ class MSMain extends DataManager
 				//block.SetIsRevealed(true);
 				
 				blockArray.push(block);
+				boardBlockList.push(block);
 				blockEntity.addChild(new Entity().add(block));
 				y++;
 			}
@@ -144,11 +151,11 @@ class MSMain extends DataManager
 			var x: Int = Math.floor(rand / GameData.GAME_GRID_ROWS);
 			var y: Int = rand % GameData.GAME_GRID_COLS;
 			
-			if (boardBlocks[x][y].hasBomb) {
+			if (boardBlocks[x][y].IsBlockHasBomb()) {
 				continue;
 			}
 			
-			boardBlocks[x][y].SetBlockValue(-1);
+			boardBlocks[x][y].SetBlockHasBomb();
 			bombCount--;
 		}
 	}
@@ -157,8 +164,8 @@ class MSMain extends DataManager
 		for (ii in 0...boardBlocks.length) {
 			for (block in boardBlocks[ii]) {				
 				var num: Int = 0;
-				for (neighbor in Utils.GetBlockNeighbors(block)) {
-					if (neighbor.hasBomb) {
+				for (neighbor in MSUtils.GetNeighborBlocks(block, boardBlocks)) {
+					if (neighbor.IsBlockHasBomb()) {
 						num++;
 					}
 				}
@@ -168,10 +175,33 @@ class MSMain extends DataManager
 		}
 	}
 	
+	public function GetAllBlocks(): Array<MSBlock> {
+		return boardBlockList;
+	}
+	
+	public function GetBoardBlocks(): Array<Array<MSBlock>> {
+		return boardBlocks;
+	}
+	
+	public function StartGame(): Void {
+		if (hasStarted && !hasStopped)
+			return;
+		
+		hasStarted = true;
+		hasStopped = false;
+	}
+	
+	public function StopGame(): Void {
+		if (!hasStarted && hasStopped)
+			return;
+		
+		hasStarted = false;
+		hasStopped = true;
+	}
+	
 	public function AddMarkedBlocks(amt: Int = 1): Void {
 		markedBlocks += amt;
 		SetBombCountDirty();
-
 	}
 	
 	public function SubtractMarkedBlocks(amt: Int = 1): Void {
@@ -184,7 +214,11 @@ class MSMain extends DataManager
 	}
 	
 	public function SetOpenBlocksDirty(): Void {
-		this.blocksOpened = Utils.GetRevealedBlocks().length;
+		this.blocksOpened = MSUtils.GetRevealedBlocks(GetAllBlocks()).length;
+	}
+	
+	public function IsMarkedBlocksMax(): Bool {
+		return markedBlocks >= GameData.GAME_MAX_BOMBS;
 	}
 	
 	public function HasReachedGoals(): Bool {
@@ -198,7 +232,8 @@ class MSMain extends DataManager
 	
 	override public function onUpdate(dt:Float) {
 		super.onUpdate(dt);
-		if (hasStarted) {
+		
+		if (hasStarted && !hasStopped) {
 			timeElapsed._ += dt;
 		}
 	}

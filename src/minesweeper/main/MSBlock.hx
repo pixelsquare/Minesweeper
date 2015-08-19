@@ -8,15 +8,21 @@ import flambe.display.Sprite;
 import flambe.display.TextSprite;
 import flambe.display.Texture;
 import flambe.Entity;
+import flambe.input.MouseEvent;
 import flambe.input.PointerEvent;
 import flambe.scene.Scene;
 import flambe.script.Action;
 import flambe.script.AnimateTo;
 import flambe.script.CallFunction;
+import flambe.script.Delay;
+import flambe.script.Repeat;
 import flambe.script.Script;
 import flambe.script.Sequence;
-import minesweeper.core.Utils;
+import minesweeper.core.MSUtils;
 import minesweeper.core.SceneManager;
+import flambe.System;
+import flambe.input.MouseButton;
+import minesweeper.name.GameData;
 
 /**
  * ...
@@ -29,43 +35,61 @@ class MSBlock extends Component
 	
 	public var idx(default, null): Int;
 	public var idy(default, null): Int;
-	
-	public var hasBomb(default, null): Bool;
-	public var isRevealed(default, null): Bool;
-	public var isMarked(default, null): Bool;
-	private var blockValue: Int;
 
-	public var innerTexture: Texture;
+	private var innerTexture: Texture;
 	private var innerImage: ImageSprite;
 	
-	public var blockValueFont: Font;
+	private var blockValueFont: Font;
 	private var blockValueText: TextSprite;
 	
-	public var bombTexture: Texture;
+	private var bombTexture: Texture;
 	private var bombImage: ImageSprite;
 	
-	public var outerTexture: Texture;
+	private var outerTexture: Texture;
 	private var outerImage: ImageSprite;
 	
-	public var flagTexture: Texture;
-	public var qMarkTexture: Texture;
+	private var flagTexture: Texture;
+	private var qMarkTexture: Texture;
 	private var markerImage: ImageSprite;
 	private var markerCount: UInt;
 	
 	private var blockEntity: Entity;
 	private var blockSprite: Sprite;
 	
-	public function new(innerTex: Texture, valueFont: Font, bombTex: Texture, outerTex: Texture, flagTex: Texture, qMarkTex: Texture ) {
+	private var blockRevealed: Bool;
+	private var blockMarked: Bool;
+	private var blockHasBomb: Bool;
+	private var blockValue: Int;
+	
+	private var msMain: MSMain;
+	
+	// Used to make images underneath the outer image visible even though it is hidden
+	private var visualize: Bool;
+	
+	public function new(main: MSMain, visualize: Bool = false) {
+		this.msMain = main;
 		this.x = new AnimatedFloat(0);
 		this.y = new AnimatedFloat(0);
 		
+		this.idx = 0;
+		this.idy = 0;
+		this.markerCount = 0;
+		
+		this.blockHasBomb = false;
+		this.blockRevealed = false;
+		this.blockMarked = false;
+		this.blockValue = -1;
+		
+		this.visualize = visualize;
+	}
+	
+	public function Init(innerTex: Texture, valueFont: Font, bombTex: Texture, outerTex: Texture, flagTex: Texture, qMarkTex: Texture) {
 		this.innerTexture = innerTex;
 		this.blockValueFont = valueFont;
 		this.bombTexture = bombTex;
 		this.outerTexture = outerTex;
 		this.flagTexture = flagTex;
 		this.qMarkTexture = qMarkTex;
-		this.markerCount = 0;
 		
 		CreateBlock();
 	}
@@ -83,17 +107,17 @@ class MSBlock extends Component
 		
 		blockValueText = new TextSprite(blockValueFont, blockValue + "");
 		blockValueText.centerAnchor();
-		//blockValueText.visible = false;
+		blockValueText.visible = false;
 		blockButtonEntity.addChild(new Entity().add(blockValueText));
 		
 		bombImage = new ImageSprite(bombTexture);
 		bombImage.centerAnchor();
-		//bombImage.visible = false;
+		bombImage.visible = false;
 		blockButtonEntity.addChild(new Entity().add(bombImage));
 		
 		outerImage = new ImageSprite(outerTexture);
 		outerImage.centerAnchor();
-		outerImage.setAlpha(0.25);
+		outerImage.setAlpha(visualize ? 0.2 : 1);
 		blockButtonEntity.addChild(new Entity().add(outerImage));
 		
 		markerImage = new ImageSprite(flagTexture);
@@ -103,13 +127,154 @@ class MSBlock extends Component
 		
 		blockEntity.addChild(blockButtonEntity.add(blockSprite));
 		
-		//blockSprite.pointerDown.connect(function(event: PointerEvent) {
-			//SetIsRevealed(true);
-		//});
-		
+		// Send signal to MS Main
 		blockSprite.pointerIn.connect(function(event: PointerEvent) {
-			MSMain.current.curBlock = this;
+			msMain.onMouseClick.emit(this);
 		});
+	}
+	
+	public function SetBlockValue(value: Int): Void {
+		if (blockHasBomb)
+			return;
+		
+		this.blockValue = value;
+		this.blockValueText.text = this.blockValue + "";
+		
+		if (visualize) {
+			blockValueText.visible = (blockValue > 0) ? true : false;
+		}
+	}
+	
+	public function SetBlockHasBomb(): Void {
+		if (blockValue > -1)
+			return;
+		
+		this.blockHasBomb = true;
+		
+		if (visualize) {
+			bombImage.visible = true;
+		}
+	}
+	
+	public function RevealBlock(forceReveal: Bool = false): Void {
+		if (blockRevealed || blockMarked)
+			return;
+			
+		markerImage.visible = false;
+		var script: Script = new Script();
+		script.run(new Sequence([
+			new CallFunction(function() {
+				innerImage.visible = true;
+				msMain.canMove = false;
+			
+				if(!visualize) {
+					bombImage.visible = blockHasBomb ? true : false;				
+					blockValueText.visible = (blockValue > 0) ? true : false;
+				}
+				
+				if (blockValue == 0) {
+					MSUtils.OpenNeighborBlocks(this, msMain.GetBoardBlocks());
+				}
+			}),
+			new AnimateTo(outerImage.alpha, 0, 0.5),
+			
+			// After all the animation is done.
+			new CallFunction(function() {
+				outerImage.visible = false;
+				msMain.canMove = true;
+				msMain.SetOpenBlocksDirty();
+				
+				if(!forceReveal) {
+					if (blockHasBomb) {
+						MSUtils.RevealAllBombs(msMain.GetAllBlocks());
+						ShakeBomb();
+					}
+					
+					// Trigger game over screen when player picks a bomb block or goal is complete
+					if (blockHasBomb || msMain.HasReachedGoals()) {
+						msMain.StopGame();
+						var gameOverScript: Script = new Script();
+						gameOverScript.run(new Sequence([
+							new Delay(2.5),
+							new CallFunction(function() {
+								SceneManager.current.ShowGameOverScreen();
+							})
+						]));
+						
+						blockEntity.addChild(new Entity().add(gameOverScript));
+					}
+				}
+				
+				// DEBUGGING!
+				//if (forceReveal) {
+					//SceneManager.current.ShowGameOverScreen();
+				//}
+				
+				// Gradually revealing blocks
+				//if (blockValue == 0) {
+					//MSUtils.OpenNeighborBlocks(this, msMain.boardBlocks);
+				//}
+			})
+		]));
+		
+		blockEntity.addChild(new Entity().add(script));
+			
+		blockRevealed = true;
+	}
+	
+	public function MarkBlock(): Void {
+		if (msMain.IsMarkedBlocksMax() && markerCount == 0)
+			return;
+		
+		blockMarked = true;
+		markerImage.visible = true;
+		
+		markerCount++;
+		if (markerCount > 2) {
+			markerCount = 0;
+			blockMarked = false;
+			markerImage.visible = false;
+			markerImage.alpha.animate(1, 0, 0.2);
+		}
+		
+		// Flag
+		if (markerCount == 1) {
+			markerImage.texture = flagTexture;
+			markerImage.alpha.animate(0, 1, 0.2);
+			msMain.AddMarkedBlocks();
+		}
+		// Question Mark
+		else if (markerCount == 2) {
+			blockMarked = false;
+			markerImage.texture = qMarkTexture;
+			markerImage.alpha.animate(0, 1, 0.2);
+			msMain.SubtractMarkedBlocks();
+		}
+	}
+	
+	public function GetBlockValue(): Int {
+		return blockValue;
+	}
+	
+	public function IsBlockHasBomb(): Bool {
+		return blockHasBomb;
+	}
+	
+	public function IsBlockRevealed(): Bool {
+		return blockRevealed;
+	}
+	
+	public function IsBlockMarked(): Bool {
+		return blockMarked;
+	}
+	
+	public function ShakeBomb(): Void {
+		var shakeScript: Script = new Script();
+		shakeScript.run(new Repeat(new Sequence([
+			new AnimateTo(bombImage.x, bombImage.x._ + 1, 0.05),
+			new AnimateTo(bombImage.x, bombImage.x._ - 1, 0.05),
+		])));
+		blockEntity.addChild(new Entity().add(shakeScript));
 	}
 	
 	public function SetBlockID(x: Int, y: Int): Void {
@@ -122,131 +287,6 @@ class MSBlock extends Component
 		this.y._ = y;
 		SetBlockDirty();
 		return this;
-	}
-	
-	public function SetBlockValue(value: Int): Void {
-		//if (value == 0)
-			//return;
-		
-		if (this.hasBomb)
-			return;
-		
-		this.blockValue = value;
-			
-		if (value == -1) {
-			bombImage.visible = true;
-			blockValueText.visible = false;
-			SetHasBomb(true);
-			return;
-		}
-		
-		blockValueText.visible = true;
-		bombImage.visible = false;
-		blockValueText.text = this.blockValue + "";
-	}
-	
-	public function SetHasBomb(hasBomb: Bool): Void {
-		if (this.hasBomb == hasBomb)
-			return;
-		
-		this.hasBomb = hasBomb;
-	}
-	
-	public function SetIsRevealed(isRevealed: Bool): Void {
-		if (this.isRevealed == isRevealed)
-			return;
-			
-		if (this.isMarked && markerCount == 1)
-			return;
-		
-		innerImage.visible = true;
-		if (hasBomb) {
-			bombImage.visible = true;
-		}
-		else {
-			if (blockValue > 0) {
-				blockValueText.visible = true;
-			}
-		}
-			
-		var action;
-		if (isRevealed) {
-			outerImage.alpha._ = 1;
-			action = new AnimateTo(outerImage.alpha, 0, 0.5);
-		}
-		else {
-			outerImage.alpha._ = 0;
-			action = new AnimateTo(outerImage.alpha, 1, 0.5);
-		}
-		
-		var script: Script = new Script();
-		script.run(new Sequence([
-			action,
-			new CallFunction(function() {
-				if (this.hasBomb) {
-					SceneManager.current.ShowGameOverScreen();
-				}
-				outerImage.visible = false;
-			})
-		]));
-		
-		markerImage.visible = false;
-		this.isRevealed = isRevealed;
-		
-		if (this.blockValue == 0) {
-			Utils.OpenNeighbors(this);
-		}
-		
-		blockEntity.addChild(new Entity().add(script));
-	}
-	
-	public function SetIsMarked(isMarked: Bool): Void {			
-		if (this.isRevealed)
-			return;
-			
-		if (MSMain.current.bombCount._ <= 0 && markerCount == 0)
-			return;
-			
-		markerCount++;
-		if (markerCount > 2) {
-			markerCount = 0;
-			isMarked = false;
-		}
-		
-		if (markerCount == 1) {				
-			markerImage.texture = flagTexture;
-			MSMain.current.AddMarkedBlocks();
-			markerImage.visible = true;
-		}
-		else if (markerCount == 2) {
-			markerImage.texture = qMarkTexture;
-			MSMain.current.SubtractMarkedBlocks();
-			markerImage.visible = true;
-		}
-		
-		var action: Action;
-		if (isMarked) {
-			markerImage.alpha._ = 0;
-			action = new AnimateTo(markerImage.alpha, 1, 0.5);
-		}
-		else {
-			markerImage.alpha._ = 1;
-			action = new AnimateTo(markerImage.alpha, 0, 0.5);
-		}
-		
-		var script: Script = new Script();
-		script.run(new Sequence([
-			action,
-			new CallFunction(function() {
-				if(!isMarked) {
-					markerImage.visible = false;
-				}
-			})
-		]));
-			
-		blockEntity.addChild(new Entity().add(script));
-		
-		this.isMarked = isMarked;
 	}
 	
 	public function GetNaturalWidth(): Float {

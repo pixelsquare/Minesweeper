@@ -40,8 +40,12 @@ class Main
 				
 				// Load up all asset data
 				sceneManager.InitScenes(mainPack, gameStorage);
-				sceneManager.ShowMainScreen(true);
-				//sceneManager.ShowScreen(new SplashScreen(preloadPack), true);
+				#if flash
+					sceneManager.ShowTitleScreen(true);
+					//sceneManager.ShowMainScreen(true);
+				#else
+					sceneManager.ShowScreen(new SplashScreen(preloadPack), true);
+				#end
 			});
 			
 			// Preloading goes here

@@ -18,7 +18,7 @@ import minesweeper.main.MSMain;
 import minesweeper.core.SceneManager;
 import minesweeper.screen.GameScreen;
 import minesweeper.name.AssetName;
-import minesweeper.core.Utils;
+import minesweeper.core.MSUtils;
 import minesweeper.name.GameData;
 
 /**
@@ -43,9 +43,20 @@ class MainScreen extends GameScreen
 		this.gameBombCount = GameData.GAME_MAX_BOMBS;
 		
 		System.keyboard.down.connect(function(event: KeyboardEvent) {
-			if (event.key == Key.B) {
+			if (event.key == Key.F1) {
 				SceneManager.current.ShowPauseScreen();
-				//SceneManager.current.ShowGameOverScreen();
+			}
+			
+			if (event.key == Key.F2) {
+				SceneManager.current.ShowGameOverScreen();
+			}
+			
+			if (event.key == Key.F3) {
+				MSUtils.RevealAllNonBombs(msMain.GetAllBlocks());
+			}
+			
+			if (event.key == Key.F4) {
+				MSUtils.RevealAllBlocks(msMain.GetAllBlocks());
 			}
 		});
 	}
@@ -76,7 +87,7 @@ class MainScreen extends GameScreen
 		timerEntity.addChild(new Entity().add(timerBg));
 		
 		var timerFont: Font = new Font(gameAsset, AssetName.FONT_VANADINE_32);
-		timerText = new TextSprite(timerFont, Utils.ToMMSS(gameTimeElapsed));
+		timerText = new TextSprite(timerFont, MSUtils.ToMMSS(gameTimeElapsed));
 		timerText.centerAnchor();
 		timerText.setXY(
 			timerBg.x._ + 20,
@@ -116,7 +127,7 @@ class MainScreen extends GameScreen
 		
 		msMain.timeElapsed.watch(function(a: Float, b: Float) {
 			gameTimeElapsed = msMain.timeElapsed._;
-			timerText.text = Utils.ToMMSS(gameTimeElapsed);
+			timerText.text = MSUtils.ToMMSS(gameTimeElapsed);
 		});
 		
 		return screenEntity;

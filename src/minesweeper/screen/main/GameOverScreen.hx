@@ -16,7 +16,7 @@ import minesweeper.name.AssetName;
 import flambe.asset.AssetPack;
 import flambe.subsystem.StorageSystem;
 import flambe.System;
-import minesweeper.core.Utils;
+import minesweeper.core.MSUtils;
 
 /**
  * ...
@@ -53,7 +53,7 @@ class GameOverScreen extends GameScreen
 		}
 		
 		var timeElapsedFont: Font = new Font(gameAsset, AssetName.FONT_UNCERTAIN_SANS_32);
-		var timeElapsedText: TextSprite = new TextSprite(timeElapsedFont, "Time Elapsed\n       " + Utils.ToMMSS(mainScreen.gameTimeElapsed));
+		var timeElapsedText: TextSprite = new TextSprite(timeElapsedFont, "Time Elapsed\n       " + MSUtils.ToMMSS(mainScreen.gameTimeElapsed));
 		timeElapsedText.alpha._ = 0.0;
 		timeElapsedText.centerAnchor();
 		timeElapsedText.setXY(
