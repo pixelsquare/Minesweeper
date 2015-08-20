@@ -1,6 +1,7 @@
 package minesweeper.screen.main;
 
 import flambe.asset.AssetPack;
+import flambe.display.FillSprite;
 import flambe.display.ImageSprite;
 import flambe.display.Sprite;
 import flambe.Entity;
@@ -9,6 +10,7 @@ import flambe.script.Delay;
 import flambe.script.Script;
 import flambe.script.Sequence;
 import flambe.subsystem.StorageSystem;
+import flambe.System;
 
 import minesweeper.core.SceneManager;
 import minesweeper.name.AssetName;
@@ -34,8 +36,16 @@ class TitleScreen extends GameScreen
 		screenEntity = super.CreateScreen();
 		RemoveTitleText();
 		
-		var titleBG: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_MENU_BG));
-		screenEntity.addChild(new Entity().add(titleBG));
+		//var titleBG: FillSprite = new FillSprite(0x253F47, System.stage.width, System.stage.height);
+		//screenEntity.addChild(new Entity().add(titleBG));
+		
+		#if android
+			var titleBG: FillSprite = new FillSprite(0x253F47, System.stage.width, System.stage.height);
+			screenEntity.addChild(new Entity().add(titleBG));
+		#else
+			var titleBG: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_MENU_BG));
+			screenEntity.addChild(new Entity().add(titleBG));
+		#end
 		
 		var script: Script = new Script();
 		script.run(new Sequence([

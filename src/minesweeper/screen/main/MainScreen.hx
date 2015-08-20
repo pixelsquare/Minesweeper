@@ -1,6 +1,7 @@
 package minesweeper.screen.main;
 
 import flambe.asset.AssetPack;
+import flambe.display.FillSprite;
 import flambe.display.Font;
 import flambe.display.ImageSprite;
 import flambe.display.TextSprite;
@@ -27,8 +28,13 @@ class MainScreen extends GameScreen
 	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
 		super(assetPack, storage);
+	}
+	
+	override public function CreateScreen(): Entity {
+		screenEntity = super.CreateScreen();
 		
-		System.keyboard.down.connect(function(event: KeyboardEvent) {
+		// DEBUGGING --
+		screenDisposer.add(System.keyboard.down.connect(function(event: KeyboardEvent) {
 			if (event.key == Key.F1) {
 				SceneManager.current.ShowPauseScreen();
 			}
@@ -50,14 +56,35 @@ class MainScreen extends GameScreen
 					SceneManager.current.ShowPauseScreen();
 				}
 			}
-		});
-	}
-	
-	override public function CreateScreen(): Entity {
-		screenEntity = super.CreateScreen();
+		}));
+		// END-OF-DEBUGGING --
 		
-		var background: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_INGAME_BG));
-		screenEntity.addChild(new Entity().add(background));
+		//var background: FillSprite = new FillSprite(0x253F47, System.stage.width, System.stage.height);
+		//screenEntity.addChild(new Entity().add(background));
+		//
+		//var board: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_BOARD));
+		//board.centerAnchor();
+		//board.setXY(
+			//System.stage.width / 2,
+			//System.stage.height / 2
+		//);
+		//screenEntity.addChild(new Entity().add(board));
+		
+		#if android
+			var background: FillSprite = new FillSprite(0x253F47, System.stage.width, System.stage.height);
+			screenEntity.addChild(new Entity().add(background));
+			
+			var board: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_BOARD));
+			board.centerAnchor();
+			board.setXY(
+				System.stage.width / 2,
+				System.stage.height / 2
+			);
+			screenEntity.addChild(new Entity().add(board));
+		#else
+			var background: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_INGAME_BG));
+			screenEntity.addChild(new Entity().add(background));
+		#end
 		
 		// Wait before starting
 		//var script: Script = new Script();

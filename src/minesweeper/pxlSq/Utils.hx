@@ -12,13 +12,9 @@ import flash.external.ExternalInterface;
  */
 class Utils
 {
-	#if flash
 	public static function ConsoleLog(str: String) {
+		#if flash
 		ExternalInterface.call("console.log", str);
+		#end
 	}
-	#else
-	public static function ConsoleLog(str: String) {
-		trace(str);
-	}
-	#end
 }

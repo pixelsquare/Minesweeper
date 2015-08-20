@@ -10,10 +10,8 @@ import flambe.util.Promise;
 
 import minesweeper.core.GameManager;
 import minesweeper.core.SceneManager;
-import minesweeper.pxlSq.Utils;
 import minesweeper.screen.PreloadScreen;
 import minesweeper.screen.SplashScreen;
-
 
 class Main
 {
@@ -31,13 +29,13 @@ class Main
 		var gameStorage: StorageSystem = System.storage;
 		
 		System.loadAssetPack(Manifest.fromAssets(PRELOAD_PATH)).get(function(preloadPack: AssetPack) {
-			Utils.ConsoleLog("Preload Initialize");
+			//Utils.ConsoleLog("Preload Initialize");
 			
 			var sceneManager: SceneManager = new SceneManager(gameDirector);
 			
 			var promise: Promise<AssetPack> = System.loadAssetPack(Manifest.fromAssets(MAIN_PATH));
 			promise.get(function(mainPack: AssetPack) {
-				Utils.ConsoleLog("Main Initialize");
+				//Utils.ConsoleLog("Main Initialize");
 				
 				// Load up all asset data
 				var gameManager: GameManager = new GameManager(mainPack, gameStorage);

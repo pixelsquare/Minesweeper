@@ -46,4 +46,5 @@ class AssetName
 	public static inline var ASSET_UNPRESSED_BLOCK: 		String = "asset_unpressed_block";
 	public static inline var ASSET_FLAG: 					String = "asset_flag";
 	public static inline var ASSET_QUESTION_MARK: 			String = "asset_question_mark";
+	public static inline var ASSET_BOARD: 					String = "asset_board";
 }

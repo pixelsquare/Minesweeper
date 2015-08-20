@@ -5,6 +5,7 @@ import flambe.asset.AssetPack;
 import flambe.Component;
 import flambe.display.Font;
 import flambe.display.Sprite;
+import flambe.Disposer;
 import flambe.Entity;
 import flambe.input.MouseButton;
 import flambe.input.MouseEvent;
@@ -40,6 +41,7 @@ class MSMain extends Component
 	private var boardBlockList: Array<MSBlock>;
 	
 	private var dataManager: DataManager;
+	private var disposer: Disposer;
 	
 	// For Debugging!
 	private var visualize: Bool = false;
@@ -64,43 +66,6 @@ class MSMain extends Component
 		CreateBoard();
 		SpawnBombs();
 		EvaluateBlocks();
-
-		var curBlock: MSBlock = null;
-		onMouseClick = new Signal1<MSBlock>();
-		onMouseClick.connect(function(block: MSBlock) {
-			curBlock = block;
-		});
-		
-		if (System.mouse.supported) {
-			// Mouse events for left and right buttons
-			System.mouse.down.connect(function(event: MouseEvent) {
-				if (curBlock == null)
-					return;
-				
-				if (event.button == MouseButton.Left) {
-					if (canMove && !hasStopped) {
-						StartGame();
-						curBlock.RevealBlock();
-					}
-				}
-				
-				if (event.button == MouseButton.Right) {
-					curBlock.MarkBlock();
-				}
-			});
-		}
-		else {
-			// Doesn't support flag placing
-			System.pointer.down.connect(function(event: PointerEvent) {
-				if (curBlock == null)
-					return;
-				
-				if (canMove && !hasStopped) {
-					StartGame();
-					curBlock.RevealBlock();
-				}
-			});
-		}
 	}
 	
 	public function CreateBoard(): Void {
@@ -108,8 +73,11 @@ class MSMain extends Component
 		boardBlocks = new Array<Array<MSBlock>>();
 		boardBlockList = new Array<MSBlock>();
 		
+		var totalWidth: Float = 0.0;
+		
 		var x: Int = 0;
 		while (x < GameData.GAME_GRID_ROWS) {
+			
 			var blockArray: Array<MSBlock> = new Array<MSBlock>();
 			var y: Int = 0;
 			while(y < GameData.GAME_GRID_COLS) {
@@ -132,6 +100,7 @@ class MSMain extends Component
 				blockArray.push(block);
 				boardBlockList.push(block);
 				blockEntity.addChild(new Entity().add(block));
+				totalWidth += block.GetNaturalWidth();
 				y++;
 			}
 			boardBlocks.push(blockArray);
@@ -139,10 +108,17 @@ class MSMain extends Component
 		}
 		
 		var blockSprite: Sprite = new Sprite();
+		#if android
 		blockSprite.setXY(
-			System.stage.width * 0.22,
-			System.stage.height * 0.115
+			System.stage.width * 0.5,
+			System.stage.height * 0.5
 		);
+		#else
+		blockSprite.setXY(
+			System.stage.width * 0.52 - (GameData.GAME_GRID_ROWS / 2) * 20,
+			System.stage.height * 0.46 - (GameData.GAME_GRID_COLS / 2) * 20
+		);
+		#end
 		gameEntity.addChild(blockEntity.add(blockSprite));
 	}
 	
@@ -232,7 +208,48 @@ class MSMain extends Component
 	
 	override public function onAdded() {
 		super.onAdded();
+		disposer = owner.get(Disposer);
+		if (disposer == null) 
+			owner.add(disposer = new Disposer());
+		
 		owner.addChild(gameEntity);
+
+		var curBlock: MSBlock = null;
+		onMouseClick = new Signal1<MSBlock>();
+		disposer.connect1(onMouseClick, function(block: MSBlock) {
+			curBlock = block;
+		});
+		
+		if (System.mouse.supported) {
+			// Mouse events for left and right buttons
+			disposer.add(System.mouse.down.connect(function(event: MouseEvent) {
+				if (curBlock == null)
+					return;
+				
+				if (event.button == MouseButton.Left) {
+					if (canMove && !hasStopped) {
+						StartGame();
+						curBlock.RevealBlock();
+					}
+				}
+				
+				if (event.button == MouseButton.Right) {
+					curBlock.MarkBlock();
+				}
+			}));
+		}
+		else {
+			// Doesn't support flag placing
+			disposer.add(System.pointer.down.connect(function(event: PointerEvent) {
+				if (curBlock == null)
+					return;
+				
+				if (canMove && !hasStopped) {
+					StartGame();
+					curBlock.RevealBlock();
+				}
+			}));
+		}
 	}
 	
 	override public function onUpdate(dt:Float) {

@@ -7,6 +7,7 @@ import flambe.display.ImageSprite;
 import flambe.display.Sprite;
 import flambe.display.TextSprite;
 import flambe.display.Texture;
+import flambe.Disposer;
 import flambe.Entity;
 import flambe.input.PointerEvent;
 import flambe.script.AnimateTo;
@@ -57,6 +58,7 @@ class MSBlock extends Component
 	private var blockValue: Int;
 	
 	private var msMain: MSMain;
+	private var disposer: Disposer;
 	
 	// Used to make images underneath the outer image visible even though it is hidden
 	private var visualize: Bool;
@@ -121,11 +123,6 @@ class MSBlock extends Component
 		blockButtonEntity.addChild(new Entity().add(markerImage));
 		
 		blockEntity.addChild(blockButtonEntity.add(blockSprite));
-		
-		// Send signal to MS Main
-		blockSprite.pointerIn.connect(function(event: PointerEvent) {
-			msMain.onMouseClick.emit(this);
-		});
 	}
 	
 	public function SetBlockValue(value: Int): Void {
@@ -219,6 +216,9 @@ class MSBlock extends Component
 	}
 	
 	public function MarkBlock(): Void {
+		if (blockRevealed)
+			return;
+		
 		if (msMain.IsMarkedBlocksMax() && markerCount == 0)
 			return;
 		
@@ -299,7 +299,16 @@ class MSBlock extends Component
 	
 	override public function onAdded() {
 		super.onAdded();
+		disposer = owner.get(Disposer);
+		if (disposer == null) 
+			owner.add(disposer = new Disposer());
+			
 		owner.addChild(blockEntity);
+		
+		// Send signal to MS Main
+		disposer.add(blockSprite.pointerIn.connect(function(event: PointerEvent) {
+			msMain.onMouseClick.emit(this);
+		}));
 	}
 	
 	override public function onUpdate(dt:Float) {

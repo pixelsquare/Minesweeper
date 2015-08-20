@@ -6,6 +6,7 @@ import flambe.display.Font;
 import flambe.display.ImageSprite;
 import flambe.display.Sprite;
 import flambe.display.TextSprite;
+import flambe.Disposer;
 import flambe.Entity;
 import flambe.input.PointerEvent;
 import flambe.math.Rectangle;
@@ -92,23 +93,23 @@ class PromptScreen extends GameScreen
 			buttonSprite.y._ = ((buttonBG.getNaturalHeight() * 3) * jj);
 			jj += (half / len);
 			
-			buttonSprite.pointerIn.connect(function(event: PointerEvent) {
+			screenDisposer.add(buttonSprite.pointerIn.connect(function(event: PointerEvent) {
 				buttonBG.texture = gameAsset.getTexture(AssetName.ASSET_BUTTON_HOVER);
-			});
+			}));
 			
-			buttonSprite.pointerOut.connect(function(event: PointerEvent) {
+			screenDisposer.add(buttonSprite.pointerOut.connect(function(event: PointerEvent) {
 				buttonBG.texture = gameAsset.getTexture(AssetName.ASSET_BUTTON_UP);
-			});
+			}));
 			
-			buttonSprite.pointerUp.connect(function(event: PointerEvent) {
+			screenDisposer.add(buttonSprite.pointerUp.connect(function(event: PointerEvent) {
 				buttonBG.texture = gameAsset.getTexture(AssetName.ASSET_BUTTON_HOVER);
 				buttonFunc = buttonHandler;
 				HideScreen();
-			});
+			}));
 			
-			buttonSprite.pointerDown.connect(function(event: PointerEvent) {
+			screenDisposer.add(buttonSprite.pointerDown.connect(function(event: PointerEvent) {
 				buttonBG.texture = gameAsset.getTexture(AssetName.ASSET_BUTTON_DOWN);
-			});			
+			}));			
 			
 			buttonSpriteList.push(buttonSprite);
 			buttonsEntity.addChild(buttonEntity.add(buttonSprite));
