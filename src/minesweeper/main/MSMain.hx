@@ -1,36 +1,29 @@
 package minesweeper.main;
 
+import flambe.animation.AnimatedFloat;
 import flambe.asset.AssetPack;
+import flambe.Component;
+import flambe.display.Font;
 import flambe.display.Sprite;
 import flambe.Entity;
+import flambe.input.MouseButton;
 import flambe.input.MouseEvent;
 import flambe.input.PointerEvent;
-import flambe.subsystem.StorageSystem;
-import flambe.display.Font;
-import flambe.display.Texture;
-import flambe.System;
 import flambe.math.FMath;
-import flambe.input.MouseButton;
-import flambe.util.Signal1.Listener1;
-import flambe.util.SignalConnection;
-import minesweeper.screen.GameScreen;
-import minesweeper.screen.main.MainScreen;
-import flambe.animation.AnimatedFloat;
-import haxe.Timer;
+import flambe.subsystem.StorageSystem;
+import flambe.System;
 import flambe.util.Signal1;
-import minesweeper.pxlSq.Utils;
 
 import minesweeper.core.DataManager;
+import minesweeper.main.MSUtils;
 import minesweeper.name.AssetName;
 import minesweeper.name.GameData;
-import minesweeper.main.MSUtils;
-import minesweeper.core.SceneManager;
 
 /**
  * ...
  * @author Anthony Ganzon
  */
-class MSMain extends DataManager
+class MSMain extends Component
 {
 	public var markedBlocks(default, null): Int;
 	public var bombCount(default, null): AnimatedFloat;
@@ -46,12 +39,12 @@ class MSMain extends DataManager
 	private var boardBlocks: Array<Array<MSBlock>>;
 	private var boardBlockList: Array<MSBlock>;
 	
+	private var dataManager: DataManager;
+	
 	// For Debugging!
 	private var visualize: Bool = false;
 	
 	public function new(assetPack:AssetPack, storage:StorageSystem) {
-		super(assetPack, storage);
-		
 		this.markedBlocks = 0;
 		this.bombCount = new AnimatedFloat(GameData.GAME_MAX_BOMBS);
 		this.timeElapsed = new AnimatedFloat(GameData.GAME_DEFAULT_TIME);
@@ -59,6 +52,8 @@ class MSMain extends DataManager
 		this.hasStarted = false;
 		this.hasStopped = false;
 		this.canMove = true;
+		
+		this.dataManager = new DataManager(assetPack, storage);
 		
 		Init();
 	}
@@ -120,12 +115,12 @@ class MSMain extends DataManager
 			while(y < GameData.GAME_GRID_COLS) {
 				var block: MSBlock = new MSBlock(this, visualize);
 				block.Init(
-					gameAsset.getTexture(AssetName.ASSET_PRESSED_BLOCK),
-					new Font(gameAsset, AssetName.FONT_BEBASNEUE_20),
-					gameAsset.getTexture(AssetName.ASSET_BOMB),
-					gameAsset.getTexture(AssetName.ASSET_UNPRESSED_BLOCK),
-					gameAsset.getTexture(AssetName.ASSET_FLAG),
-					gameAsset.getTexture(AssetName.ASSET_QUESTION_MARK)
+					dataManager.gameAsset.getTexture(AssetName.ASSET_PRESSED_BLOCK),
+					new Font(dataManager.gameAsset, AssetName.FONT_BEBASNEUE_20),
+					dataManager.gameAsset.getTexture(AssetName.ASSET_BOMB),
+					dataManager.gameAsset.getTexture(AssetName.ASSET_UNPRESSED_BLOCK),
+					dataManager.gameAsset.getTexture(AssetName.ASSET_FLAG),
+					dataManager.gameAsset.getTexture(AssetName.ASSET_QUESTION_MARK)
 				);
 				block.SetBlockXY(
 					x * block.GetNaturalWidth(),

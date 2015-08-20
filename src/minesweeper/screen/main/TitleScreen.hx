@@ -15,8 +15,6 @@ import minesweeper.name.AssetName;
 import minesweeper.name.ScreenName;
 import minesweeper.screen.GameScreen;
 
-import minesweeper.pxlSq.Utils;
-
 /**
  * ...
  * @author Anthony Ganzon

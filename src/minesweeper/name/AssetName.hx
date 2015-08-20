@@ -1,5 +1,4 @@
 package minesweeper.name;
-import sys.db.Types.SString;
 
 /**
  * ...

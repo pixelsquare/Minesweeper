@@ -1,5 +1,6 @@
 package minesweeper.screen.main;
 
+import flambe.animation.Ease;
 import flambe.asset.AssetPack;
 import flambe.display.Font;
 import flambe.display.TextSprite;
@@ -11,12 +12,11 @@ import flambe.script.Script;
 import flambe.script.Sequence;
 import flambe.subsystem.StorageSystem;
 import flambe.System;
-import flambe.animation.Ease;
 
-import minesweeper.screen.GameScreen;
-import minesweeper.name.ScreenName;
-import minesweeper.name.AssetName;
 import minesweeper.core.SceneManager;
+import minesweeper.name.AssetName;
+import minesweeper.name.ScreenName;
+import minesweeper.screen.GameScreen;
 
 /**
  * ...

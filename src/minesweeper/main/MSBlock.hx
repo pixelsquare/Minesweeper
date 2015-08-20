@@ -8,21 +8,16 @@ import flambe.display.Sprite;
 import flambe.display.TextSprite;
 import flambe.display.Texture;
 import flambe.Entity;
-import flambe.input.MouseEvent;
 import flambe.input.PointerEvent;
-import flambe.scene.Scene;
-import flambe.script.Action;
 import flambe.script.AnimateTo;
 import flambe.script.CallFunction;
 import flambe.script.Delay;
 import flambe.script.Repeat;
 import flambe.script.Script;
 import flambe.script.Sequence;
-import minesweeper.main.MSUtils;
+
 import minesweeper.core.SceneManager;
-import flambe.System;
-import flambe.input.MouseButton;
-import minesweeper.name.GameData;
+import minesweeper.main.MSUtils;
 
 /**
  * ...

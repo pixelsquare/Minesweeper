@@ -7,13 +7,13 @@ import flambe.scene.Director;
 import flambe.subsystem.StorageSystem;
 import flambe.System;
 import flambe.util.Promise;
-import minesweeper.core.DataManager;
+
+import minesweeper.core.GameManager;
 import minesweeper.core.SceneManager;
+import minesweeper.pxlSq.Utils;
 import minesweeper.screen.PreloadScreen;
 import minesweeper.screen.SplashScreen;
-import minesweeper.core.GameManager;
 
-import minesweeper.pxlSq.Utils;
 
 class Main
 {
@@ -40,7 +40,7 @@ class Main
 				Utils.ConsoleLog("Main Initialize");
 				
 				// Load up all asset data
-				GameManager.Init(mainPack, gameStorage);
+				var gameManager: GameManager = new GameManager(mainPack, gameStorage);
 				sceneManager.InitScenes(mainPack, gameStorage);
 				
 				#if flash

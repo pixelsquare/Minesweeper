@@ -1,15 +1,13 @@
 package minesweeper.core;
 
 import flambe.asset.AssetPack;
-import flambe.Component;
 import flambe.subsystem.StorageSystem;
-import flambe.Disposer;
 
 /**
  * ...
  * @author Anthony Ganzon
  */
-class DataManager extends Component
+class DataManager
 {
 	public var gameAsset(default, null): AssetPack;
 	public var gameStorage(default, null): StorageSystem;

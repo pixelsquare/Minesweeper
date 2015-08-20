@@ -1,17 +1,17 @@
 package minesweeper.screen.main;
+
+import flambe.animation.Ease;
+import flambe.asset.AssetPack;
 import flambe.display.Font;
 import flambe.display.TextSprite;
 import flambe.Entity;
-import flambe.System;
-import flambe.asset.AssetPack;
-import flambe.subsystem.StorageSystem;
-import flambe.script.Script;
-import flambe.script.Sequence;
 import flambe.script.AnimateTo;
 import flambe.script.CallFunction;
-import flambe.animation.Ease;
+import flambe.script.Script;
+import flambe.script.Sequence;
+import flambe.subsystem.StorageSystem;
+import flambe.System;
 
-import minesweeper.name.ScreenName;
 import minesweeper.name.AssetName;
 
 /**

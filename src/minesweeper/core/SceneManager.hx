@@ -1,24 +1,22 @@
 package minesweeper.core;
 
-import flambe.Entity;
-import flambe.scene.Director;
-import flambe.asset.AssetPack;
-import flambe.subsystem.StorageSystem;
-import flambe.math.FMath;
-import flambe.System;
-import flambe.display.Sprite;
-import flambe.scene.FadeTransition;
-import flambe.scene.SlideTransition;
 import flambe.animation.Ease;
-import minesweeper.screen.main.PromptTextScreen;
+import flambe.asset.AssetPack;
+import flambe.display.Sprite;
+import flambe.Entity;
+import flambe.math.FMath;
+import flambe.scene.Director;
+import flambe.scene.FadeTransition;
+import flambe.subsystem.StorageSystem;
+import flambe.System;
 
-import minesweeper.screen.main.WaitScreen;
-import minesweeper.screen.main.MainScreen;
 import minesweeper.screen.GameScreen;
-import minesweeper.screen.main.TitleScreen;
-import minesweeper.screen.main.PromptScreen;
 import minesweeper.screen.main.GameOverScreen;
-import minesweeper.name.AssetName;
+import minesweeper.screen.main.MainScreen;
+import minesweeper.screen.main.PromptScreen;
+import minesweeper.screen.main.PromptTextScreen;
+import minesweeper.screen.main.TitleScreen;
+import minesweeper.screen.main.WaitScreen;
 
 /**
  * ...

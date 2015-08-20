@@ -1,11 +1,12 @@
 package minesweeper.core;
+
 import flambe.asset.AssetPack;
 import flambe.Entity;
 import flambe.subsystem.StorageSystem;
-import flambe.animation.AnimatedFloat;
+
 import minesweeper.main.MSMain;
-import minesweeper.name.GameData;
 import minesweeper.main.MSUtils;
+import minesweeper.name.GameData;
 
 /**
  * ...
@@ -13,17 +14,20 @@ import minesweeper.main.MSUtils;
  */
 class GameManager
 {
-	public static var gameTimeElapsed(default, null): Float;
-	public static var gameBombCount(default, null): Int;
+	public var gameTimeElapsed(default, null): Float;
+	public var gameBombCount(default, null): Int;
 	
-	private static var gameDataManager: DataManager;
-	private static var minesweeperMain: MSMain;
+	private var gameDataManager: DataManager;
+	private var minesweeperMain: MSMain;
 	
-	public static function Init(assetPack: AssetPack, storage: StorageSystem) {	
+	public static var current: GameManager;
+	
+	public function new(assetPack: AssetPack, storage: StorageSystem) {
+		current = this;
 		gameDataManager = new DataManager(assetPack, storage);
 	}
 	
-	public static function InitMSGame(entity: Entity) {
+	public function InitMSGame(entity: Entity): Void {
 		gameTimeElapsed = GameData.GAME_DEFAULT_TIME;
 		gameBombCount = GameData.GAME_MAX_BOMBS;
 		
@@ -38,15 +42,15 @@ class GameManager
 		entity.addChild(new Entity().add(minesweeperMain));
 	}
 	
-	public static function SetBombCountDirty(): Void {
+	public function SetBombCountDirty(): Void {
 		gameBombCount = GameData.GAME_MAX_BOMBS - MSUtils.GetMarkedBombBlocks(minesweeperMain.GetAllBlocks()).length;
 	}
 	
-	public static function GetGameDataManager(): DataManager {
+	public function GetGameDataManager(): DataManager {
 		return gameDataManager;
 	}
 	
-	public static function GetMSMain(): MSMain {
+	public function GetMSMain(): MSMain {
 		return minesweeperMain;
 	}
 }

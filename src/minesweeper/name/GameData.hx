@@ -1,5 +1,4 @@
 package minesweeper.name;
-import flambe.Component;
 
 /**
  * ...

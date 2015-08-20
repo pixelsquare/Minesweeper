@@ -1,6 +1,5 @@
 package minesweeper.main;
 
-import minesweeper.main.MSMain;
 import minesweeper.main.MSBlock;
 import minesweeper.name.GameData;
 

@@ -5,9 +5,9 @@ import flambe.display.FillSprite;
 import flambe.display.Font;
 import flambe.display.TextSprite;
 import flambe.Disposer;
+import flambe.Entity;
 import flambe.scene.Scene;
 import flambe.subsystem.StorageSystem;
-import flambe.Entity;
 import flambe.System;
 
 import minesweeper.core.DataManager;
