@@ -110,8 +110,8 @@ class MSMain extends Component
 		var blockSprite: Sprite = new Sprite();
 		#if android
 		blockSprite.setXY(
-			System.stage.width * 0.5,
-			System.stage.height * 0.5
+			System.stage.width * 0.52 - (GameData.GAME_GRID_ROWS / 2) * 20,
+			System.stage.height * 0.515 - (GameData.GAME_GRID_COLS / 2) * 20
 		);
 		#else
 		blockSprite.setXY(
