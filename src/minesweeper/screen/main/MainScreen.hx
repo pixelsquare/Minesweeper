@@ -23,6 +23,8 @@ import minesweeper.screen.GameScreen;
  */
 class MainScreen extends GameScreen
 {	
+	public var boardBG(default, null): ImageSprite;
+	
 	private var timerText: TextSprite;
 	private var bombsText: TextSprite;
 	
@@ -74,13 +76,13 @@ class MainScreen extends GameScreen
 			var background: FillSprite = new FillSprite(0x253F47, System.stage.width, System.stage.height);
 			screenEntity.addChild(new Entity().add(background));
 			
-			var board: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_BOARD));
-			board.centerAnchor();
-			board.setXY(
+			boardBG = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_BOARD));
+			boardBG.centerAnchor();
+			boardBG.setXY(
 				System.stage.width / 2,
-				System.stage.height / 2
+				System.stage.height * 0.4
 			);
-			screenEntity.addChild(new Entity().add(board));
+			screenEntity.addChild(new Entity().add(boardBG));
 		#else
 			var background: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_INGAME_BG));
 			screenEntity.addChild(new Entity().add(background));

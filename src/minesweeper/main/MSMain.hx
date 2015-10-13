@@ -19,6 +19,7 @@ import minesweeper.core.DataManager;
 import minesweeper.main.MSUtils;
 import minesweeper.name.AssetName;
 import minesweeper.name.GameData;
+import minesweeper.core.GameManager;
 
 /**
  * ...
@@ -109,10 +110,18 @@ class MSMain extends Component
 		
 		var blockSprite: Sprite = new Sprite();
 		#if android
-		blockSprite.setXY(
-			System.stage.width * 0.52 - (GameData.GAME_GRID_ROWS / 2) * 20,
-			System.stage.height * 0.515 - (GameData.GAME_GRID_COLS / 2) * 20
-		);
+		if(GameManager.current.GetSceneManager().gameMainScreen.boardBG != null) {
+			blockSprite.setXY(
+				GameManager.current.GetSceneManager().gameMainScreen.boardBG.x._ - ((GameData.GAME_GRID_ROWS - 1) / 2) * 20,
+				GameManager.current.GetSceneManager().gameMainScreen.boardBG.y._ - ((GameData.GAME_GRID_COLS - 1) / 2) * 20
+			);
+		}
+		else {
+			blockSprite.setXY(
+				System.stage.width * 0.52 - (GameData.GAME_GRID_ROWS / 2) * 20,
+				System.stage.height * 0.515 - (GameData.GAME_GRID_COLS / 2) * 20
+			);
+		}
 		#else
 		blockSprite.setXY(
 			System.stage.width * 0.52 - (GameData.GAME_GRID_ROWS / 2) * 20,

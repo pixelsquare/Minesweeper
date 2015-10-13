@@ -1,6 +1,7 @@
 package minesweeper.core;
 
 import flambe.asset.AssetPack;
+import flambe.display.ImageSprite;
 import flambe.Entity;
 import flambe.subsystem.StorageSystem;
 
@@ -44,6 +45,10 @@ class GameManager
 	
 	public function SetBombCountDirty(): Void {
 		gameBombCount = GameData.GAME_MAX_BOMBS - MSUtils.GetMarkedBombBlocks(minesweeperMain.GetAllBlocks()).length;
+	}
+	
+	public function GetSceneManager(): SceneManager {
+		return SceneManager.current;
 	}
 	
 	public function GetGameDataManager(): DataManager {

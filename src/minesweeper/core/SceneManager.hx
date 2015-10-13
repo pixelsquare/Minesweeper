@@ -2,6 +2,8 @@ package minesweeper.core;
 
 import flambe.animation.Ease;
 import flambe.asset.AssetPack;
+import flambe.Component;
+import flambe.display.ImageSprite;
 import flambe.display.Sprite;
 import flambe.Entity;
 import flambe.math.FMath;
@@ -17,6 +19,7 @@ import minesweeper.screen.main.PromptScreen;
 import minesweeper.screen.main.PromptTextScreen;
 import minesweeper.screen.main.TitleScreen;
 import minesweeper.screen.main.WaitScreen;
+import minesweeper.name.AssetName;
 
 /**
  * ...
@@ -36,8 +39,8 @@ class SceneManager
 	
 	private var gameScreens: Array<GameScreen>;
 	
-	public static inline var TARGET_WIDTH: 	Int = 640;
-	public static inline var TARGET_HEIGHT: Int = 800;
+	public static inline var TARGET_WIDTH: 	Int = 200;
+	public static inline var TARGET_HEIGHT: Int = 200;
 	
 	private static inline var TRANSITION_SHORT: Float = 0.5;
 	private static inline var TRANSITION_LONG: Int = 1;
@@ -50,6 +53,7 @@ class SceneManager
 	}
 	
 	public function InitScenes(assetPack: AssetPack, storage: StorageSystem) {
+		System.stage.resize.connect(OnScreenResize);
 		gameScreens = new Array<GameScreen>();
 		
 		gameScreens.push(gameTitleScreen = new TitleScreen(assetPack, storage));
@@ -58,6 +62,47 @@ class SceneManager
 		gameScreens.push(gameOverScreen = new GameOverScreen(assetPack, storage));
 		gameScreens.push(gamePromptScreen = new PromptScreen(assetPack, storage));
 		gameScreens.push(gamePromptTextScreen = new PromptTextScreen(assetPack, storage));
+		
+		var sprite: ImageSprite = new ImageSprite(assetPack.getTexture(AssetName.ASSET_BOMB));
+		var testEntity: Entity = new Entity()
+			.addChild(new Entity().add(new Sprite()))
+			.addChild(new Entity().add(sprite));
+		
+		//spriteEntity.add(sprite);
+		//spriteEntity.addChild(new Entity().add(sprite));
+		//testEntity.addChild(spriteEntity);
+		
+		//minesweeper.pxlSq.Utils.ConsoleLog(testEntity.toString() + "");
+		//minesweeper.pxlSq.Utils.ConsoleLog(testEntity.firstChild + " " + spriteEntity.firstChild + " "  + testEntity);
+		
+		recursion(testEntity);
+		
+		//testEntity.has
+		
+		//var child = testEntity.firstChild;
+		//while (child != null) {
+			//var next = child.next;
+			//
+			//minesweeper.pxlSq.Utils.ConsoleLog(child.has(Sprite) + "");
+			//
+			//child = next;
+		//}
+	}
+	
+	private function recurse<A:Component>(componentClass:Class < A > ): Void {
+		
+	}
+	
+	private function recursion(root: Entity): Void {
+		var child = root.firstChild;
+		while (child != null) {
+			var next = child.next;
+			
+			minesweeper.pxlSq.Utils.ConsoleLog(child.has(Sprite) + "");
+			
+			recursion(child);
+			child = next;
+		}
 	}
 	
 	public function OnScreenResize() {

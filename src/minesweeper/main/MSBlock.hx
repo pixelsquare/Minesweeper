@@ -16,6 +16,7 @@ import flambe.script.Delay;
 import flambe.script.Repeat;
 import flambe.script.Script;
 import flambe.script.Sequence;
+import flambe.System;
 
 import minesweeper.core.SceneManager;
 import minesweeper.main.MSUtils;
@@ -100,26 +101,31 @@ class MSBlock extends Component
 		innerImage = new ImageSprite(innerTexture);
 		innerImage.centerAnchor();
 		innerImage.visible = false;
+		innerImage.setScaleXY(1, (System.stage.width / System.stage.height) + 1);
 		blockButtonEntity.addChild(new Entity().add(innerImage));
 		
 		blockValueText = new TextSprite(blockValueFont, blockValue + "");
 		blockValueText.centerAnchor();
 		blockValueText.visible = false;
+		blockValueText.setScaleXY(1, (System.stage.width / System.stage.height) + 1);
 		blockButtonEntity.addChild(new Entity().add(blockValueText));
 		
 		bombImage = new ImageSprite(bombTexture);
 		bombImage.centerAnchor();
 		bombImage.visible = false;
+		bombImage.setScaleXY(1, (System.stage.width / System.stage.height) + 1);
 		blockButtonEntity.addChild(new Entity().add(bombImage));
 		
 		outerImage = new ImageSprite(outerTexture);
 		outerImage.centerAnchor();
 		outerImage.setAlpha(visualize ? 0.2 : 1);
+		outerImage.setScaleXY(1, (System.stage.width / System.stage.height) + 1);
 		blockButtonEntity.addChild(new Entity().add(outerImage));
 		
 		markerImage = new ImageSprite(flagTexture);
 		markerImage.centerAnchor();
 		markerImage.visible = false;
+		markerImage.setScaleXY(1, (System.stage.width / System.stage.height) + 1);
 		blockButtonEntity.addChild(new Entity().add(markerImage));
 		
 		blockEntity.addChild(blockButtonEntity.add(blockSprite));

@@ -44,6 +44,7 @@ class TitleScreen extends GameScreen
 			screenEntity.addChild(new Entity().add(titleBG));
 		#else
 			var titleBG: ImageSprite = new ImageSprite(gameAsset.getTexture(AssetName.ASSET_MENU_BG));
+			titleBG.setScaleXY(System.stage.width / titleBG.getNaturalWidth(), (System.stage.width / System.stage.height) + 1);
 			screenEntity.addChild(new Entity().add(titleBG));
 		#end
 		
